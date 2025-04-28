@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Calculation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; text-align: center; }
+        .navbar { background: #4CAF50; padding: 10px; }
+        .navbar a { color: white; text-decoration: none; padding: 10px 20px; display: inline-block; }
+        .container { padding: 20px; }
+        .input-field { margin: 10px; padding: 8px; width: 80%; max-width: 400px; }
+        .btn { background: #4CAF50; color: white; padding: 10px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="home.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="instructions.html">Instructions</a>
+        <a href="calculation.html">Calculation</a>
+    </div>
+    
+    <div class="container">
+        <h2>Calculate Water Requirement</h2>
+        <p>Enter details to determine the amount of water needed for your crops.</p>
+        <input type="text" id="crop" class="input-field" placeholder="Enter Crop Type">
+        <input type="number" id="days" class="input-field" placeholder="Days Since Planting">
+        <select id="soil" class="input-field">
+            <option value="">Select Soil Type</option>
+            <option value="Sandy">Sandy</option>
+            <option value="Clayey">Clayey</option>
+            <option value="Loamy">Loamy</option>
+            <option value="Silty">Silty</option>
+        </select>
+        <input type="number" id="moisture" class="input-field" placeholder="Soil Moisture (%)">
+        <button class="btn" onclick="calculateWaterRequirement()">Get Advice</button>
+        <p id="adviceResult"></p>
+        <p id="waterAmount"></p>
+    </div>
+
+    <script>
+        function calculateWaterRequirement() {
+            const crop = document.getElementById('crop').value.trim();
+            const days = parseInt(document.getElementById('days').value, 10);
+            const soil = document.getElementById('soil').value;
+            const moisture = parseFloat(document.getElementById('moisture').value);
+            
+            if (!crop || isNaN(days) || !soil || isNaN(moisture)) {
+                alert('Please fill all fields correctly!');
+                return;
+            }
+            
+            let waterNeeded;
+            if (moisture > 25) {
+                waterNeeded = 0;
+            } else if (moisture > 15) {
+                waterNeeded = 10;
+            } else if (moisture > 10) {
+                waterNeeded = 20;
+            } else {
+                waterNeeded = 30;
+            }
+            
+            document.getElementById('adviceResult').innerText = 'Based on the soil moisture, here is your watering advice:';
+            document.getElementById('waterAmount').innerText = `Water Needed: ${waterNeeded} mm per square meter`;
+        }
+    </script>
+</body>
+</html>

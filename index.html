@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Irrigation System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-brand">
+            🌱 SmartIrrigation
+        </div>
+        <div class="nav-links">
+            <a href="#dashboard">Dashboard</a>
+            <a href="#advice">Advice</a>
+            <a href="#history">History</a>
+            <button class="btn" id="openRegisterModal">Register</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Left Column -->
+        <div class="main-column">
+            
+            <!-- Dashboard Card -->
+            <section id="dashboard" class="glass dashboard">
+                <h2 class="dashboard-title">Live Sensor Data</h2>
+                <div class="gauges">
+                    <div class="gauge-container">
+                        <div class="gauge" id="moistureGauge">--%</div>
+                        <span>Soil Moisture</span>
+                    </div>
+                    <div class="gauge-container">
+                        <div class="gauge" id="tempGauge" style="border-top-color: var(--severity-warning)">--°C</div>
+                        <span>Temperature</span>
+                    </div>
+                    <div class="gauge-container">
+                        <div class="gauge" id="humidityGauge" style="border-top-color: #3b82f6">--%</div>
+                        <span>Humidity</span>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                    Last Updated: <span id="lastWatered">Loading...</span>
+                </p>
+            </section>
+
+            <!-- Advice Form Card -->
+            <section id="advice" class="glass form-card">
+                <h2>Get Watering Advice</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Enter field data to receive AI-driven irrigation recommendations.</p>
+                
+                <form id="irrigation-form">
+                    <div class="form-group">
+                        <label for="crop">Crop Type</label>
+                        <input type="text" id="crop" class="form-control" placeholder="e.g. Tomato, Corn" required>
+                        <div class="error-text">Crop type is required.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="days">Days Since Planting</label>
+                        <input type="number" id="days" class="form-control" placeholder="e.g. 45" min="0" required>
+                        <div class="error-text">Please enter a valid positive number.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="soil">Soil Type</label>
+                        <select id="soil" class="form-control" required>
+                            <option value="">Select Soil Type</option>
+                            <option value="sandy">Sandy (Fast draining)</option>
+                            <option value="loamy">Loamy (Balanced)</option>
+                            <option value="clay">Clay (Water retaining)</option>
+                        </select>
+                        <div class="error-text">Please select a soil type.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <label for="moisture" style="margin-bottom: 0;">Current Soil Moisture (%)</label>
+                            <span id="toggleMoistureHelp" style="color: var(--accent-color); font-size: 0.8rem; cursor: pointer; text-decoration: underline;">How to estimate?</span>
+                        </div>
+                        <input type="number" id="moisture" class="form-control" placeholder="0-100" min="0" max="100" required>
+                        <div class="error-text">Moisture must be between 0 and 100.</div>
+                        <div id="moistureHelpBox" style="display: none; margin-top: 0.75rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-left: 3px solid var(--accent-color); border-radius: 4px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                            <strong style="color: var(--text-main);">Method 1: The "Feel" Test</strong><br>
+                            Dig about 4-6 inches deep, grab a handful of soil, and squeeze it:<br>
+                            • <strong>10-30%</strong>: Dry, crumbles completely, won't form a ball.<br>
+                            • <strong>40-60%</strong>: Forms a loose ball. Feels slightly damp.<br>
+                            • <strong>70-80%</strong>: Forms a tight ball, leaves a damp outline on hand.<br>
+                            • <strong>90-100%</strong>: Muddy. Water drips out when squeezed.<br><br>
+                            <strong style="color: var(--text-main);">Method 2: The Wooden Stick Test</strong><br>
+                            Insert a wooden chopstick or dowel 4-6 inches into the soil, leave for 5 minutes, then pull it out:<br>
+                            • <strong>Dry (&lt;30%)</strong>: Stick comes out clean.<br>
+                            • <strong>Moist (40-70%)</strong>: Stick comes out dark and slightly damp.<br>
+                            • <strong>Wet (&gt;80%)</strong>: Stick comes out muddy or with water clinging to it.<br><br>
+                            <strong style="color: var(--text-main);">Method 3: The Weight Method (Most Accurate)</strong><br>
+                            1. Weigh a sample of fresh soil to get the <strong>Wet Weight</strong>.<br>
+                            2. Dry the soil completely (e.g., in the sun or baked at a low temperature).<br>
+                            3. Weigh it again to get the <strong>Dry Weight</strong>.<br>
+                            4. Calculate: <strong>((Wet Weight - Dry Weight) / Dry Weight) × 100</strong> to find your exact moisture percentage.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" id="submitAdviceBtn" style="width: 100%;">Get Recommendation</button>
+                </form>
+                
+                <div id="result"></div>
+            </section>
+        </div>
+
+        <!-- Right Column -->
+        <div class="side-column">
+            
+            <!-- Weather Card -->
+            <section class="glass weather-card">
+                <h2>Local Forecast</h2>
+                <div class="weather-icon" id="weatherIcon">⛅</div>
+                <h3 style="font-size: 2rem;" id="weatherTemp">--°C</h3>
+                <p style="color: var(--text-muted);" id="weatherCondition">Loading...</p>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <p>Precipitation Chance: <strong id="weatherRain">--%</strong></p>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- History Card (Full Width) -->
+        <section id="history" class="glass history-card">
+            <h2>Irrigation History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Crop</th>
+                        <th>Soil</th>
+                        <th>Moisture</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <tr><td colspan="5" style="text-align:center; color: var(--text-muted)">No history available.</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 Smart Irrigation System. All rights reserved.
+    </footer>
+
+    <!-- Registration Modal -->
+    <div class="modal-overlay" id="regModalOverlay">
+        <div class="glass form-card modal-content" onclick="event.stopPropagation()">
+            <span class="close-modal" id="closeRegModal">&times;</span>
+            <h2 style="margin-bottom: 1.5rem;">Create Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Register</button>
+                <p id="regMessage" style="margin-top: 1rem; text-align: center; font-size: 0.9rem;"></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- Modal Logic ---
+        const modalOverlay = document.getElementById('regModalOverlay');
+        const openModalBtn = document.getElementById('openRegisterModal');
+        const closeModalBtn = document.getElementById('closeRegModal');
+
+        function openModal() { modalOverlay.classList.add('active'); }
+        function closeModal() { modalOverlay.classList.remove('active'); document.getElementById('regMessage').textContent = ''; }
+
+        openModalBtn.addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', closeModal);
+
+        // --- Moisture Help Toggle ---
+        const toggleHelpBtn = document.getElementById('toggleMoistureHelp');
+        const helpBox = document.getElementById('moistureHelpBox');
+        toggleHelpBtn.addEventListener('click', () => {
+            if (helpBox.style.display === 'none') {
+                helpBox.style.display = 'block';
+                toggleHelpBtn.textContent = 'Hide help';
+            } else {
+                helpBox.style.display = 'none';
+                toggleHelpBtn.textContent = 'How to estimate?';
+            }
+        });
+
+        // --- Client-side Form Validation ---
+        const adviceForm = document.getElementById('irrigation-form');
+        const inputs = adviceForm.querySelectorAll('input, select');
+        const submitBtn = document.getElementById('submitAdviceBtn');
+
+        function validateForm() {
+            let isValid = true;
+            inputs.forEach(input => {
+                let inputValid = input.checkValidity();
+                if (input.id === 'moisture') {
+                    const val = parseInt(input.value);
+                    if (val < 0 || val > 100) inputValid = false;
+                }
+                if (input.id === 'days') {
+                    if (parseInt(input.value) < 0) inputValid = false;
+                }
+
+                if (!inputValid && input.value !== '') {
+                    input.classList.add('invalid');
+                } else {
+                    input.classList.remove('invalid');
+                }
+                if (!inputValid) isValid = false;
+            });
+            submitBtn.disabled = !isValid;
+            return isValid;
+        }
+
+        inputs.forEach(input => {
+            input.addEventListener('input', validateForm);
+        });
+
+        // --- API Calls ---
+        
+        // Fetch Dashboard Data
+        async function loadDashboard() {
+            try {
+                const res = await fetch('/api/dashboard');
+                const data = await res.json();
+                document.getElementById('moistureGauge').textContent = data.moisture + '%';
+                document.getElementById('tempGauge').textContent = data.temperature + '°C';
+                document.getElementById('humidityGauge').textContent = data.humidity + '%';
+                document.getElementById('lastWatered').textContent = data.lastWatered;
+            } catch (e) { console.error('Error loading dashboard'); }
+        }
+
+        // Fetch Weather Data
+        async function loadWeather() {
+            try {
+                const res = await fetch('/api/weather');
+                const data = await res.json();
+                document.getElementById('weatherTemp').textContent = data.temp + '°C';
+                document.getElementById('weatherCondition').textContent = data.condition;
+                document.getElementById('weatherRain').textContent = data.precipitationChance + '%';
+                
+                const icons = {'Sunny': '☀️', 'Partly Cloudy': '⛅', 'Rain': '🌧️', 'Overcast': '☁️'};
+                document.getElementById('weatherIcon').textContent = icons[data.condition] || '⛅';
+            } catch (e) { console.error('Error loading weather'); }
+        }
+
+        // Fetch History
+        async function loadHistory() {
+            try {
+                const res = await fetch('/api/history');
+                const data = await res.json();
+                const tbody = document.getElementById('historyTableBody');
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">No history available.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(record => `
+                    <tr>
+                        <td style="font-size: 0.9rem">${record.timestamp.split(',')[1]}</td>
+                        <td>${record.crop}</td>
+                        <td style="text-transform: capitalize">${record.soil}</td>
+                        <td>${record.moisture}%</td>
+                        <td><span class="badge ${record.severity}">${record.severity.toUpperCase()}</span></td>
+                    </tr>
+                `).join('');
+            } catch (e) { console.error('Error loading history'); }
+        }
+
+        // Submit Advice Form
+        adviceForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!validateForm()) return;
+
+            const payload = {
+                crop: document.getElementById('crop').value,
+                days: parseInt(document.getElementById('days').value),
+                soil: document.getElementById('soil').value,
+                moisture: parseInt(document.getElementById('moisture').value)
+            };
+
+            const btn = document.getElementById('submitAdviceBtn');
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/get-advice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                
+                if (res.ok) {
+                    resultDiv.textContent = data.advice;
+                    resultDiv.style.borderColor = `var(--severity-${data.severity})`;
+                    // Reload history to show new entry
+                    loadHistory();
+                } else {
+                    resultDiv.textContent = data.error || 'An error occurred.';
+                    resultDiv.style.borderColor = 'var(--severity-critical)';
+                }
+            } catch (e) {
+                document.getElementById('result').textContent = 'Network error.';
+                document.getElementById('result').style.display = 'block';
+            } finally {
+                btn.textContent = 'Get Recommendation';
+                btn.disabled = false;
+            }
+        });
+
+        // Register Form
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const msgEl = document.getElementById('regMessage');
+            
+            const payload = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const res = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                
+                msgEl.textContent = data.message || data.error;
+                msgEl.style.color = res.ok ? 'var(--severity-normal)' : 'var(--severity-critical)';
+                
+                if (res.ok) {
+                    setTimeout(() => { closeModal(); this.reset(); }, 2000);
+                }
+            } catch (e) {
+                msgEl.textContent = 'Network error.';
+                msgEl.style.color = 'var(--severity-critical)';
+            }
+        });
+
+        // Initialization
+        loadDashboard();
+        loadWeather();
+        loadHistory();
+        
+        // Refresh dashboard and weather periodically
+        setInterval(loadDashboard, 10000); // 10s
+        setInterval(loadWeather, 60000);   // 60s
+
+    </script>
+</body>
+</html>
